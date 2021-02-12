@@ -31,23 +31,7 @@ class myClientThread (threading.Thread):
     def getCoordinates(self):
         return self.node.x,self.node.y
 
-# class myServerThread(threading.Thread):
-#     def __init__(self, threadID,thread,pos):
-#         threading.Thread.__init__(self)
-#         self.threadID = threadID
-#         self.clientThread=thread
-#         self.pos=pos
-    
-#     def run(self):
-#        updatePosOfClients(self.clientThread,self.pos)
-       
-#     def getCoordinates(self):
-#         return self.node.x,self.node.y
-
-# def updatePosOfClients(thread,pos):
-#     while True:
-        
-        
+                
         
 
 
@@ -76,7 +60,7 @@ ClientThreads=[]
 pos=[]
 
 
-for i in range(20):
+for i in range(40):
     thread1 = myClientThread(i)
     thread1.start()
     myPresentX,myPresentY=thread1.getCoordinates()
@@ -88,7 +72,7 @@ for i in range(20):
 
     
 while True:
-    for i in range(20): 
+    for i in range(40): 
         pygame.draw.rect(window, WHITE, (pos[i][0],pos[i][1],8,8),0,0)
         myPresentX,myPresentY=ClientThreads[i].getCoordinates()
         pygame.draw.rect(window, NODE, (myPresentX,myPresentY,8,8),0,0)
