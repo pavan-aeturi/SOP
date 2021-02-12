@@ -31,26 +31,22 @@ class myClientThread (threading.Thread):
     def getCoordinates(self):
         return self.node.x,self.node.y
 
-class myServerThread(threading.Thread):
-    def __init__(self, threadID,thread,pos):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.clientThread=thread
-        self.pos=pos
+# class myServerThread(threading.Thread):
+#     def __init__(self, threadID,thread,pos):
+#         threading.Thread.__init__(self)
+#         self.threadID = threadID
+#         self.clientThread=thread
+#         self.pos=pos
     
-    def run(self):
-       updatePosOfClients(self.clientThread,self.pos)
+#     def run(self):
+#        updatePosOfClients(self.clientThread,self.pos)
        
-    def getCoordinates(self):
-        return self.node.x,self.node.y
+#     def getCoordinates(self):
+#         return self.node.x,self.node.y
 
-def updatePosOfClients(thread,pos):
-    while True:
-        pygame.display.update()
-        pygame.draw.rect(window, WHITE, (pos[i][0],pos[i][1],8,8),0,0)
-        myPresentX,myPresentY=thread.getCoordinates()
-        pygame.draw.rect(window, NODE, (myPresentX,myPresentY,8,8),0,0)
-        pos[i]=[myPresentX,myPresentY]
+# def updatePosOfClients(thread,pos):
+#     while True:
+        
         
         
 
@@ -76,27 +72,29 @@ for i in range(0,600,10):
 pygame.display.update()
 
 ClientThreads=[]
-ServerThreads=[]
 
 pos=[]
 
 
-for i in range(2):
+for i in range(20):
     thread1 = myClientThread(i)
     thread1.start()
-    
     myPresentX,myPresentY=thread1.getCoordinates()
     pos.append([myPresentX,myPresentY])
     pygame.draw.rect(window, NODE, (myPresentX,myPresentY,8,8),0,0)
     pygame.display.update()
     ClientThreads.append(thread1)
     
-for i in range(2):
-    thread1 = myServerThread(i,ClientThreads[i],pos)
-    thread1.start()
-    ServerThreads.append(thread1)
+
     
 while True:
+    for i in range(20): 
+        pygame.draw.rect(window, WHITE, (pos[i][0],pos[i][1],8,8),0,0)
+        myPresentX,myPresentY=ClientThreads[i].getCoordinates()
+        pygame.draw.rect(window, NODE, (myPresentX,myPresentY,8,8),0,0)
+        pos[i]=[myPresentX,myPresentY]
+        pygame.display.update()
+
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             pygame.quit()
