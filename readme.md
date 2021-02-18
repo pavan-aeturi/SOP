@@ -6,4 +6,4 @@ Download :
 2. clone the repository to a remote folder
 3. run "python3 server.py" in the terminal
 
-![alt text](https://github.com/pavan-aeturi/chatApp/blob/master/ezgif.com-video-to-gif.gif?raw=true)
+![alt text](https://github.com/pavan-aeturi/SOP/blob/main/ezgif.com-video-to-gif.gif?raw=true)
