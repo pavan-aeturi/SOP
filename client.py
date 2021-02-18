@@ -6,8 +6,8 @@ WHITE  =[255,255,255]
 
 
 def main(ROWS,COLUMNS,node):
-    Vx=10 if (random.randint(1,2)==1) else -10
-    Vy=10 if (random.randint(1,2)==1) else -10
+    Vx=20 if (random.randint(1,2)==1) else -10
+    Vy=20 if (random.randint(1,2)==1) else -10
     
     myPresentX=(random.randint(0,COLUMNS))//10*10 
     myPresentY=(random.randint(0,ROWS))//10*10 
