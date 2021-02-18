@@ -36,8 +36,9 @@ class myClientThread (threading.Thread):
 
 
 WHITE  =[255,255,255]
-GRID   =[234,191,159]
-NODE   =[145,9,30]
+GRID1  =[234,191,159]
+GRID   =[220,220,220] 
+NODE   =[250,120,120]
 ROWS   =600
 COLUMNS=1000
 
