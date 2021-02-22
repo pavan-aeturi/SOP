@@ -1,16 +1,27 @@
 import random
+import math
 from time import sleep
 NODE   =[145,9,30]
 WHITE  =[255,255,255]
 
 
 
+
+maxspeed=4
+minspeed=1
+
 def main(ROWS,COLUMNS,node):
-    Vx=20 if (random.randint(1,2)==1) else -10
-    Vy=20 if (random.randint(1,2)==1) else -10
+    boxsize=node.boxsize
+    vtempx=random.randint(minspeed,maxspeed)*boxsize
+    vtempy=random.randint(minspeed,maxspeed)*boxsize
+    Vx=vtempx if (random.randint(1,2)==1) else -vtempx
+    Vy=vtempy if (random.randint(1,2)==1) else -vtempy
     
-    myPresentX=(random.randint(0,COLUMNS))//10*10 
-    myPresentY=(random.randint(0,ROWS))//10*10 
+    myPresentX=(random.randint(0,COLUMNS))//boxsize*boxsize 
+    myPresentY=(random.randint(0,ROWS))//boxsize*boxsize 
+    
+    myPresentX+=2
+    myPresentY+=2
     
     node.x=myPresentX
     node.y=myPresentY
@@ -20,8 +31,7 @@ def main(ROWS,COLUMNS,node):
     boolY=(myPresentY>=0 and myPresentY<=ROWS)
     boolX=(myPresentX>=0 and myPresentX<=COLUMNS)
     
-    myPresentX+=2
-    myPresentY+=2
+   
     
     while boolX and boolY:
         
@@ -37,15 +47,20 @@ def main(ROWS,COLUMNS,node):
             if myTempX<=0:
                 myTempX=2
             else:
-                myTempX=COLUMNS+2
-            Vx=-Vx
+                myTempX=COLUMNS+2-boxsize
+            
+            Vx=-(Vx//abs(Vx))*random.randint(minspeed,maxspeed)*boxsize
+            Vy=((Vy//abs(Vy)))*random.randint(minspeed,maxspeed)*boxsize
+            
             
         if not bTempY:
             if myTempY<=0:
                 myTempY=2
             else:
-                myTempY=ROWS+2
-            Vy=-Vy
+                myTempY=ROWS+2-boxsize
+            
+            Vx=(Vx//abs(Vx))*random.randint(minspeed,maxspeed)*boxsize
+            Vy=-((Vy//abs(Vy)))*random.randint(minspeed,maxspeed)*boxsize
         
         
         myPresentX=myTempX
