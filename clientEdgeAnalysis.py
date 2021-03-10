@@ -5,6 +5,7 @@ from time import sleep
 maxspeed=1
 minspeed=1
 
+
 def main(ROWS,COLUMNS,node,turnoff):
     cost=0
     boxsize=node.boxsize
@@ -26,18 +27,20 @@ def main(ROWS,COLUMNS,node,turnoff):
     
     boolY=(myPresentY>=0 and myPresentY<=ROWS)
     boolX=(myPresentX>=0 and myPresentX<=COLUMNS)
-   
+    iterations=1000
     
-    while not turnoff:
-        
+    while iterations>0 and not turnoff:
+        iterations-=1
         myTempX=myPresentX
         myTempX+=Vx
         myTempY=myPresentY
         myTempY+=Vy
+        
         minx=node.boundaries[0][0]
         maxx=node.boundaries[0][1]
         miny=node.boundaries[1][0]
         maxy=node.boundaries[1][1]
+        ed=[(maxx+minx)//2 ,(maxy+miny)//2]
         #print(node.boundaries)
         bTempX= (myTempX>=0 and myTempX<=COLUMNS)
         bTempY= (myTempY>=0 and myTempY<=ROWS)
@@ -64,19 +67,20 @@ def main(ROWS,COLUMNS,node,turnoff):
         
         bTempX= (myTempX>=minx and myTempX<=maxx)
         bTempY= (myTempY>=miny and myTempY<=maxy)
-       
+        dis=pow(pow(ed[0]-myPresentX,2)+pow(ed[1]-myPresentY,2),0.5)
         if ( not bTempX ) or (not bTempY):
             node.edgeThread=node.edgeThread.returnMyEdge(node.myThread,[myTempX,myTempY])
-            cost+=3
+            node.cost+=3*dis*1e-7
         else:
-            cost+=1
+            node.cost+=(1e-7)*dis
         myPresentX=myTempX
         myPresentY=myTempY
         node.x=myPresentX
         node.y=myPresentY
         node.Vx=Vx
         node.Vy=Vy
-        sleep(0.3)
-        
+        # sleep(0.3)
+    
+
 if __name__=="__main__":
     pass

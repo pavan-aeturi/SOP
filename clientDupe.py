@@ -4,9 +4,6 @@ from time import sleep
 NODE   =[145,9,30]
 WHITE  =[255,255,255]
 
-ROWS   =500
-COLUMNS=500
-
 
 class node():
     def __init__(self,x=2,y=2,Vx=1,Vy=1): 
@@ -23,13 +20,11 @@ class node():
         self.x=x
     def sety(self,y):
         self.y=y
+
         
-def main(boxsize,numberOfParticals):
-        
-   
-    iterations=100
-    
-    gridL=500//boxsize
+def main(ROWS,COLUMNS,boxsize,numberOfParticals,occupancyPercentage=20):
+    iterations=100 
+    gridL=ROWS//boxsize
     count=[[0 for i in range(gridL)] for j in range(gridL)]
     particle=[None for i in range(numberOfParticals)]
     
@@ -96,18 +91,14 @@ def main(boxsize,numberOfParticals):
             particle[i].Vy=Vy
             particle[i].x=myPresentX
             particle[i].y=myPresentY
+    
     probabilities=[0 for i in range(10)]
     for i in range(gridL):
         for j in range(gridL):
             pb=(count[i][j]/iterations)
             probabilities[min(int(pb*10),9)]+=1
     
-    print("total:"+str(gridL*gridL))
-    for i in range(10):
-        if i!=9:
-            print("0."+str(i)+" to 0."+str(i+1)+" = "+str(probabilities[i]))
-        else:
-            print("0."+str(i)+" to 1 = "+str(probabilities[i]))
+    return (probabilities[occupancyPercentage//10]/(gridL*gridL))*100
 
 if __name__=="__main__":
     main(20,400)
