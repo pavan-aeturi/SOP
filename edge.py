@@ -2,7 +2,7 @@ from time import sleep
 import threading
 import random
 from client import main as clientMain
-
+from math import floor
 ROWS   =500
 COLUMNS=500
 gridsize=25
@@ -10,53 +10,25 @@ boxSize=gridsize-2
 numberOfParticals=140
 edgesAlongRow=4
 
-# class edge():
-#     def __init__(self,mythread,clientThreads,boundaries):
-#         self.clientThreads=clientThreads
-#         self.boundaries=boundaries
-#         self.cost=0
-#         self.mythread=mythread
-#         self.on=True
-    
-#     def signIn(self,clientThread):
-#         self.clientThreads.append(clientThread)
-#         clientThread.syncNodeWithEdge(self.mythread)
-#         return True
-
-#     def signOut(self,clientThread):
-#         try:
-#             self.clientThreads.remove(clientThread)
-#             return True
-#         except:
-#             return False
-    
-#     def turnOff(self):
-#         self.on=False
- 
-#     def egdeRun(self):
-#         while(self.on):
-#             sleep(0.3)
-#             pass
-#         return self.on
-
 class myClientThread (threading.Thread):
-    def __init__(self, threadID):
+    def __init__(self, threadID,Attractor=None):
       threading.Thread.__init__(self)
       self.threadID = threadID
       myPresentX=(random.randint(0,COLUMNS-1))//gridsize*gridsize 
       myPresentY=(random.randint(0,ROWS-1))//gridsize*gridsize 
       self.node = node(self,myPresentX,myPresentY)
       self.turnoff=False
-    
+      self.attractor=Attractor
+      
     def run(self):
-       clientMain(ROWS,COLUMNS,self.node,self.turnoff)
+       clientMain(ROWS,COLUMNS,self.node,self.turnoff,self.attractor)
     
     def syncNodeWithEdge(self,edgeThread):
         self.node.setEdge(edgeThread)
         
         
     def getCoorColors(self):
-        return self.node.x,self.node.y, [self.node.colorR,self.node.colorG,self.node.colorB]
+        return floor(self.node.x/gridsize)*gridsize+2,floor(self.node.y/gridsize)*gridsize+2, self.node.colors
     
     def switchOff(self):
         self.turnoff=True
@@ -72,16 +44,14 @@ class node():
         self.edgeThread=None
         self.boundaries=None
         self.boxsize=gridsize
-        self.colorR=250
-        self.colorG=120
-        self.colorB=120
+        self.colors=[250,120,120]
         self.cost=0
         
     def setEdge(self,edgeThread):
         self.edgeThread=edgeThread
         self.boundaries=edgeThread.boundaries
-        
-          
+        self.colors=edgeThread.colors
+    
     def setVx(self,Vx):
         self.Vx=Vx
         

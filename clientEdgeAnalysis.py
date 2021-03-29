@@ -6,7 +6,7 @@ maxspeed=1
 minspeed=1
 
 
-def main(ROWS,COLUMNS,node,turnoff):
+def main(ROWS,COLUMNS,node,turnoff,numOfIterations):
     cost=0
     boxsize=node.boxsize
     vtempx=random.randint(minspeed,maxspeed)*boxsize
@@ -27,10 +27,10 @@ def main(ROWS,COLUMNS,node,turnoff):
     
     boolY=(myPresentY>=0 and myPresentY<=ROWS)
     boolX=(myPresentX>=0 and myPresentX<=COLUMNS)
-    iterations=1000
+   
     
-    while iterations>0 and not turnoff:
-        iterations-=1
+    while numOfIterations>0 and not turnoff:
+        numOfIterations-=1
         myTempX=myPresentX
         myTempX+=Vx
         myTempY=myPresentY
@@ -68,11 +68,26 @@ def main(ROWS,COLUMNS,node,turnoff):
         bTempX= (myTempX>=minx and myTempX<=maxx)
         bTempY= (myTempY>=miny and myTempY<=maxy)
         dis=pow(pow(ed[0]-myPresentX,2)+pow(ed[1]-myPresentY,2),0.5)
+        #print(dis)
         if ( not bTempX ) or (not bTempY):
-            node.edgeThread=node.edgeThread.returnMyEdge(node.myThread,[myTempX,myTempY])
-            node.cost+=3*dis*1e-7
+            # b1=node.edgeThread.boundaries
+            node.myThread.syncNodeWithEdge(node.edgeThread.returnMyEdge(node.myThread,[myTempX,myTempY]))
+            b2=node.edgeThread.boundaries
+            minx=node.boundaries[0][0]
+            maxx=node.boundaries[0][1]
+            miny=node.boundaries[1][0]
+            maxy=node.boundaries[1][1]
+            ed2=[(maxx+minx)//2 ,(maxy+miny)//2]
+        
+            c1=pow(pow(ed2[0]-ed[0],2)+pow(ed2[1]-ed[1],2),0.5)
+            dis2=pow(pow(ed2[0]-myPresentX,2)+pow(ed2[1]-myPresentY,2),0.5)
+            w=(node.myThread.logOutCost*c1+dis2+dis)
+            node.cost+=w
+            node.edgeThread.cost+=w
         else:
-            node.cost+=(1e-7)*dis
+            w=2*dis
+            node.cost+=w
+            node.edgeThread.cost+=w
         myPresentX=myTempX
         myPresentY=myTempY
         node.x=myPresentX

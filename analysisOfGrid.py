@@ -30,7 +30,5 @@ ax.set_ylabel('(y) Number of particles')
 ax.set_zlabel("(z) % of grids with "+str(occupancyPercentage)+"-"+str(occupancyPercentage+10)+"% occupancy rate")
 
 plt.show()
-   
-if __name__ == '__main__':
-    pass
+
     
