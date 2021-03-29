@@ -6,7 +6,7 @@ maxspeed=50
 minspeed=25
 minInAttractor=1
 maxInAttractor=1
-
+Logincost=8.5
 def main(ROWS,COLUMNS,node,turnoff,attractor=None):
     cost=0
     boxsize=node.boxsize
@@ -94,7 +94,7 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
             ed2=[(maxx+minx)//2 ,(maxy+miny)//2]
             c1=pow(pow(ed2[0]-ed[0],2)+pow(ed2[1]-ed[1],2),0.5)
             dis2=pow(pow(ed2[0]-myPresentX,2)+pow(ed2[1]-myPresentY,2),0.5)
-            w=(3*c1+dis2+dis)
+            w=(Logincost*c1+dis2+dis)
             node.cost+=w
             node.edgeThread.increaseCost(w)
         else:

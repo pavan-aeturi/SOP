@@ -2,6 +2,7 @@ from clientEdgeAnalysis import main as clientMain
 import matplotlib.pyplot as plt
 import threading
 import random
+from math import ceil
 from colors import colors
 from  time import sleep
 from edge import node
@@ -134,18 +135,21 @@ if __name__ == '__main__':
     # plt.title("Edge service analysis")
     # plt.show()
     
-    arr=[ i for i in range(1,10)]
+    arr=[ i for i in range(1,11)]
     x=[]
     y=[]
     z=[]      
     for i in edgesAR:
+        l=[]
         for j in range(len(arr)):
             x.append(i*i)
             y.append(arr[j])
-            z.append(main(i,arr[j])/(numberOfParticals*numOfIterations))
+            val=main(i,arr[j])/(numberOfParticals*numOfIterations)
+            z.append(val)
+            l.append(ceil(val))
             ClientThreads=[]
             edgeThreads=[]
-        
+        print(l)
     fig = plt.figure()
     ax = fig.add_subplot(111,projection="3d")
 
