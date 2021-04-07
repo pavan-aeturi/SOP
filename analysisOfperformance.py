@@ -78,18 +78,24 @@ class edgeClients(threading.Thread):
     
             
     def returnMyEdge(self,nodeThread,boundary):
-        e=nodeThread.node.potentialThread
-        myReale=nodeThread.node.potentialThread
+        # first declare our answer(e) and potential answer(myReale)
+        e=self
+        myReale=self
+        # Now assign present potential thread to our answer(e) and store potential thread in "myReale"
         for ed in (e.faceNeighbours+e.cornerNeighbours):
             if ed.checkMyboundaries(boundary):
                    e=ed
-                   myReale=e
+                   myReale=ed
                    break
+        # if loadBalaning is True and if our potential thread is busy find if any 
+        # faceNeighbours are free if not find any corner Neighbours are free
+        # if everyone is busy then its the job of our potential thread to handle the node
+        
         if loadBalancing and len(e.clientThreads)>=ceil(1.5*numberOfParticals/(edgesAlongRow*edgesAlongRow)):
             e=returnCloser(myReale.faceNeighbours,boundary) or myReale
             if e is myReale:
                 e = returnCloser(myReale.cornerNeighbours,boundary) or myReale
-        
+        # Do the handover and takeover 
         self.clientThreads.remove(nodeThread)
         e.addNodes(nodeThread,myReale)
         return e,myReale
