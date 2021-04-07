@@ -1,11 +1,11 @@
-import pygame
-from client import main as clientMain
+import numpy as np
+import matplotlib.pyplot as plt
 import threading
 import random
 from math import ceil
 from colors import colors as C
 from  time import sleep
-from edge import myClientThread,node
+from edge_for_performanceTest import myClientThread,node
 from attractor import getAttractorArea,getOnlyAttractor
 
 WHITE  =[255,255,255]
@@ -15,21 +15,22 @@ GRID   =[220,220,220]
 NODE   =[250,120,120]
 ATTRACT=[100,50,100]
 ROWS   =500
-COLUMNS=500
-loadBalancing=False
+COLUMNS=500 
 gridsize=25
-targetEdge=5
+loadBalancing=True
 boxSize=gridsize-2
 numberOfParticals=150
+targetEdge=5
 edgesAlongRow=4
 attractorSize=7
 ClientThreads=[]
 edgeThreads=[]
-
+iterations=1000
 pos=[]
 edgeNum=edgesAlongRow*edgesAlongRow
 edgeGridSize=((ROWS//gridsize)//(edgesAlongRow))*gridsize
 attractor=None
+
 def returnCloser(edges,boundary):
     closest=float('inf')
     e=None
@@ -40,6 +41,7 @@ def returnCloser(edges,boundary):
                 e=ed
                 closest=val
     return e
+
 class edgeClients(threading.Thread):
     def __init__(self, threadID,firstX,lastX,firstY,lastY,clientThreads=[]):
         threading.Thread.__init__(self)
@@ -47,6 +49,7 @@ class edgeClients(threading.Thread):
         self.boundaries= [[firstX,lastX],[firstY,lastY]]
         self.clientThreads=[]
         self.cost=0
+        self.pingEdges=0
         self.faceNeighbours=[]
         self.cornerNeighbours=[]
         self.colors=C[threadID]
@@ -86,7 +89,7 @@ class edgeClients(threading.Thread):
             e=returnCloser(myReale.faceNeighbours,boundary) or myReale
             if e is myReale:
                 e = returnCloser(myReale.cornerNeighbours,boundary) or myReale
-
+        
         self.clientThreads.remove(nodeThread)
         e.addNodes(nodeThread,myReale)
         return e,myReale
@@ -99,6 +102,7 @@ class edgeClients(threading.Thread):
         
         return False
     def increaseCost(self,cost):
+        #print(cost)
         self.cost+=cost
 
     def findDistance(self,loc):
@@ -108,36 +112,20 @@ class edgeClients(threading.Thread):
     
 def putEdges(et=None):
     for j in range(edgeNum):
-        
         x=j%edgesAlongRow
         y=j//edgesAlongRow
-        
         xmid=2+x*edgeGridSize+((edgeGridSize//2)//gridsize)*gridsize
         ymid=2+y*edgeGridSize+((edgeGridSize//2)//gridsize)*gridsize
-        pygame.draw.rect(window,C[j],(xmid,ymid,boxSize,boxSize),0,0)
         if et!=None:
             thread1=edgeClients(j,x*edgeGridSize,(x+1)*edgeGridSize,y*edgeGridSize,(y+1)*edgeGridSize)
             et.append(thread1)
     if et!=None:
         for e in et:
             e.addNeighbours()
-    pygame.display.update()
     
-pygame.init()
-window = pygame.display.set_mode((COLUMNS,ROWS))
-pygame.display.set_caption("HOUSE GRID")
-window.fill(WHITE)
-pygame.display.update()
+    
 
-for i in range(0,ROWS,gridsize):
-    pygame.draw.rect(window, GRID, (i,0,2,ROWS),0,5)
-for i in range(0,ROWS,gridsize):
-    pygame.draw.rect(window, GRID, (0,i,ROWS,2),0,5)
-for i in range(0,ROWS,((ROWS//edgesAlongRow)//gridsize)*gridsize):
-    pygame.draw.rect(window, SUBGRID, (i,0,2,ROWS),0,5)
-    pygame.draw.rect(window, SUBGRID, (0,i,ROWS,2),0,5)
 
-pygame.display.update()
 putEdges(edgeThreads)
 isAttractor=[[False for _ in range(ROWS//gridsize)]for i in range(ROWS//gridsize)]   
 for i in range(targetEdge,targetEdge+1):
@@ -150,7 +138,7 @@ for i in range(targetEdge,targetEdge+1):
 attractor=getOnlyAttractor(ROWS//gridsize,isAttractor)
 
 for i in range(numberOfParticals):
-    thread1 = myClientThread(i,attractor)
+    thread1 = myClientThread(i,iterations,attractor)
     myPresentX,myPresentY,colors=thread1.getCoorColors()
     x=myPresentX//(edgeGridSize)
     y=myPresentY//(edgeGridSize)
@@ -159,37 +147,58 @@ for i in range(numberOfParticals):
     thread1.syncNodeWithEdge(e,e)
     ClientThreads.append(thread1)
 
-for i in range(ROWS//gridsize):
-    for j in range(ROWS//gridsize):
-        if isAttractor[i][j]:
-            pygame.draw.rect(window,ATTRACT, (i*gridsize+2,j*gridsize+2,boxSize,boxSize),0,0)
-        pygame.display.update()
-
 
 for i in range(numberOfParticals):
     ClientThreads[i].start()
-    myPresentX,myPresentY,colors=ClientThreads[i].getCoorColors()
-    pos.append([myPresentX,myPresentY])
-    pygame.draw.rect(window,colors, (myPresentX,myPresentY,boxSize,boxSize),0,0)
-    putEdges()
-    pygame.display.update()
-    
-    
-while True:
-    for i in range(numberOfParticals):
-        x=(pos[i][0]-2)//gridsize
-        y=(pos[i][1]-2)//gridsize
-        if isAttractor[min(x,(ROWS//gridsize)-1)][min(y,(ROWS//gridsize)-1)]:
-            pygame.draw.rect(window, ATTRACT, (pos[i][0],pos[i][1],boxSize,boxSize),0,0)
-        else:
-            pygame.draw.rect(window, WHITE, (pos[i][0],pos[i][1],boxSize,boxSize),0,0)
-        myPresentX,myPresentY,colors=ClientThreads[i].getCoorColors()
-        pygame.draw.rect(window, colors, (myPresentX,myPresentY,boxSize,boxSize),0,0)
-        putEdges()
-        pos[i]=[myPresentX,myPresentY]
-        pygame.display.update()
 
-    for event in pygame.event.get():
-        if event.type==pygame.QUIT:
-            pygame.quit()
-            
+for i in range(numberOfParticals):
+    ClientThreads[i].join()
+  
+
+x=["face","center","corner"]
+cost =[0 for i in range(3)]
+Number=[0 for i in range(3)]
+
+
+for i in range(len(edgeThreads)):
+    index=int()
+    if (i%edgesAlongRow==1 or i%edgesAlongRow==2) and (i//edgesAlongRow==1 or i//edgesAlongRow==2):
+        index=1
+    elif (i%edgesAlongRow==0 or i%edgesAlongRow==3) and (i//edgesAlongRow==0 or i//edgesAlongRow==3):
+        index=2
+    else:
+        index=0
+        # print(i%edgesAlongRow)
+        # print(i/edgesAlongRow)
+        # print("hello")
+    #print(edgeThreads[i].cost)
+    cost[index]+=edgeThreads[i].cost/iterations
+    Number[index]+=edgeThreads[i].pingEdges/(iterations)
+
+left = [1, 2, 3]
+
+cost[0]/=8
+cost[1]/=4
+cost[2]/=4
+
+Number[0]/=8
+Number[1]/=4
+Number[2]/=4
+# plotting a bar chart
+plt.bar(left, cost, tick_label = x,
+        width = 0.4, color = 'blue')
+  
+# naming the x-axis
+plt.xlabel('position of edges')
+# naming the y-axis
+plt.ylabel('operational cost factor of each edge')
+# plot title
+plt.title('My bar chart!')
+  
+# function to show the plot
+plt.show()
+
+plt.bar(left, Number, tick_label = x,
+        width = 0.4, color = 'blue')
+plt.ylabel('Number of clients of each edge')
+plt.show()

@@ -149,7 +149,7 @@ if __name__ == '__main__':
             l.append(ceil(val))
             ClientThreads=[]
             edgeThreads=[]
-        print(l)
+        # print(l)
     fig = plt.figure()
     ax = fig.add_subplot(111,projection="3d")
 

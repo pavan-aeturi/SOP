@@ -7,7 +7,8 @@ minspeed=25
 minInAttractor=1
 maxInAttractor=1
 Logincost=8.5
-def main(ROWS,COLUMNS,node,turnoff,attractor=None):
+
+def main(ROWS,COLUMNS,iterations,node,turnoff,attractor=None):
     cost=0
     boxsize=node.boxsize
     mins=minspeed
@@ -38,7 +39,8 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
     boolY=(myPresentY>=0 and myPresentY<=ROWS)
     boolX=(myPresentX>=0 and myPresentX<=COLUMNS)
     isInAttractor=False
-    while not turnoff:
+    while iterations>0 and not turnoff:
+        
         p=[floor(node.x/boxsize),floor(node.y/boxsize)]
        
         if p in attractor:
@@ -90,6 +92,7 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
         dis=pow(pow(ed[0]-myPresentX,2)+pow(ed[1]-myPresentY,2),0.5)
         
         if ( not bTempX ) or (not bTempY):
+            node.edgeThread.pingEdges+=1
             e,p=node.edgeThread.returnMyEdge(node.myThread,[myTempX,myTempY])
             node.myThread.syncNodeWithEdge(e,p)
             ed2=[(maxx+minx)//2 ,(maxy+miny)//2]
@@ -102,6 +105,7 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
             w=2*dis
             node.cost+=w
             node.edgeThread.increaseCost(w)
+            node.edgeThread.pingEdges+=1
         
         myPresentX=myTempX
         myPresentY=myTempY
@@ -110,7 +114,8 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
         # print(node.x,node.y)
         node.Vx=Vx
         node.Vy=Vy
+        iterations-=1
         sleep(0.3)
-        
+
 if __name__=="__main__":
     pass

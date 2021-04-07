@@ -1,7 +1,7 @@
 from time import sleep
 import threading
 import random
-from client import main as clientMain
+from client_performance import main as clientMain
 from math import floor
 ROWS   =500
 COLUMNS=500
@@ -11,9 +11,10 @@ numberOfParticals=140
 edgesAlongRow=4
 
 class myClientThread (threading.Thread):
-    def __init__(self, threadID,Attractor=None):
+    def __init__(self, threadID,iterations,Attractor=None):
       threading.Thread.__init__(self)
       self.threadID = threadID
+      self.iterations=iterations
       myPresentX=(random.randint(0,COLUMNS-1))//gridsize*gridsize 
       myPresentY=(random.randint(0,ROWS-1))//gridsize*gridsize 
       self.node = node(self,myPresentX,myPresentY)
@@ -21,7 +22,7 @@ class myClientThread (threading.Thread):
       self.attractor=Attractor
       
     def run(self):
-       clientMain(ROWS,COLUMNS,self.node,self.turnoff,self.attractor)
+       clientMain(ROWS,COLUMNS,self.iterations,self.node,self.turnoff,self.attractor)
     #    print("done")
     
     def syncNodeWithEdge(self,edgeThread,potentialThread):
