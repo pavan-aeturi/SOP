@@ -11,25 +11,37 @@ from attractor import getAttractorArea,getOnlyAttractor
 WHITE  =[255,255,255]
 SUBGRID=[150,150,150]
 EDGE   =[0,200,150]
-GRID   =[220,220,220] 
+GRID   =[220,220,220]
 NODE   =[250,120,120]
 ATTRACT=[100,50,100]
 ROWS   =500
 COLUMNS=500
 loadBalancing=False
 gridsize=25
+useColors=True
 targetEdge=5
+iterations=10
 boxSize=gridsize-2
-numberOfParticals=150
+numberOfParticals=100
 edgesAlongRow=4
-attractorSize=7
+attractorSize=20
 ClientThreads=[]
 edgeThreads=[]
+edgeBoundariesVisible=True
+writePosToFile=False
+FILE_NAME="positions.txt"
+file = None
 
 pos=[]
 edgeNum=edgesAlongRow*edgesAlongRow
 edgeGridSize=((ROWS//gridsize)//(edgesAlongRow))*gridsize
 attractor=None
+pygame.init()
+window = pygame.display.set_mode((COLUMNS,ROWS))
+pygame.display.set_caption("HOUSE GRID")
+window.fill(WHITE)
+pygame.display.update()
+
 def returnCloser(edges,boundary):
     closest=float('inf')
     e=None
@@ -49,7 +61,10 @@ class edgeClients(threading.Thread):
         self.cost=0
         self.faceNeighbours=[]
         self.cornerNeighbours=[]
-        self.colors=C[threadID]
+        if useColors:
+            self.colors=C[threadID]
+        else:
+            self.colors=NODE
     
     def addNeighbours(self):
         
@@ -114,7 +129,8 @@ def putEdges(et=None):
         
         xmid=2+x*edgeGridSize+((edgeGridSize//2)//gridsize)*gridsize
         ymid=2+y*edgeGridSize+((edgeGridSize//2)//gridsize)*gridsize
-        pygame.draw.rect(window,C[j],(xmid,ymid,boxSize,boxSize),0,0)
+        if useColors:
+            pygame.draw.rect(window,C[j],(xmid,ymid,boxSize,boxSize),0,0)
         if et!=None:
             thread1=edgeClients(j,x*edgeGridSize,(x+1)*edgeGridSize,y*edgeGridSize,(y+1)*edgeGridSize)
             et.append(thread1)
@@ -122,20 +138,15 @@ def putEdges(et=None):
         for e in et:
             e.addNeighbours()
     pygame.display.update()
-    
-pygame.init()
-window = pygame.display.set_mode((COLUMNS,ROWS))
-pygame.display.set_caption("HOUSE GRID")
-window.fill(WHITE)
-pygame.display.update()
 
-for i in range(0,ROWS,gridsize):
-    pygame.draw.rect(window, GRID, (i,0,2,ROWS),0,5)
-for i in range(0,ROWS,gridsize):
-    pygame.draw.rect(window, GRID, (0,i,ROWS,2),0,5)
-for i in range(0,ROWS,((ROWS//edgesAlongRow)//gridsize)*gridsize):
-    pygame.draw.rect(window, SUBGRID, (i,0,2,ROWS),0,5)
-    pygame.draw.rect(window, SUBGRID, (0,i,ROWS,2),0,5)
+if edgeBoundariesVisible:
+    for i in range(0,ROWS,gridsize):
+        pygame.draw.rect(window, GRID, (i,0,2,ROWS),0,5)
+    for i in range(0,ROWS,gridsize):
+        pygame.draw.rect(window, GRID, (0,i,ROWS,2),0,5)
+    for i in range(0,ROWS,((ROWS//edgesAlongRow)//gridsize)*gridsize):
+        pygame.draw.rect(window, SUBGRID, (i,0,2,ROWS),0,5)
+        pygame.draw.rect(window, SUBGRID, (0,i,ROWS,2),0,5)
 
 pygame.display.update()
 putEdges(edgeThreads)
@@ -150,7 +161,7 @@ for i in range(targetEdge,targetEdge+1):
 attractor=getOnlyAttractor(ROWS//gridsize,isAttractor)
 
 for i in range(numberOfParticals):
-    thread1 = myClientThread(i,attractor)
+    thread1 = myClientThread(i,writePosToFile,attractor,iterations,gridsize)
     myPresentX,myPresentY,colors=thread1.getCoorColors()
     x=myPresentX//(edgeGridSize)
     y=myPresentY//(edgeGridSize)
@@ -164,21 +175,27 @@ for i in range(ROWS//gridsize):
         if isAttractor[i][j]:
             pygame.draw.rect(window,ATTRACT, (i*gridsize+2,j*gridsize+2,boxSize,boxSize),0,0)
         pygame.display.update()
-
-
+        
+if writePosToFile:
+    file = open(FILE_NAME, "w")
+    file.write(str(gridsize)+" "+str(numberOfParticals)+" "+str(iterations))
+    file.write(str(edgesAlongRow)+" "+str(len(attractor))+" ")
+    for i in range(ROWS//gridsize):
+        for j in range(ROWS//gridsize):
+            file.write(isAttractor[i][j]*1+" ")
+    
 for i in range(numberOfParticals):
     ClientThreads[i].start()
     myPresentX,myPresentY,colors=ClientThreads[i].getCoorColors()
     pos.append([myPresentX,myPresentY])
     pygame.draw.rect(window,colors, (myPresentX,myPresentY,boxSize,boxSize),0,0)
-    putEdges()
     pygame.display.update()
-    
-    
-while True:
+
+runThreads=True
+while runThreads:
     for i in range(numberOfParticals):
-        x=(pos[i][0]-2)//gridsize
-        y=(pos[i][1]-2)//gridsize
+        x=(pos[i][0])//gridsize
+        y=(pos[i][1])//gridsize
         if isAttractor[min(x,(ROWS//gridsize)-1)][min(y,(ROWS//gridsize)-1)]:
             pygame.draw.rect(window, ATTRACT, (pos[i][0],pos[i][1],boxSize,boxSize),0,0)
         else:
@@ -188,8 +205,23 @@ while True:
         putEdges()
         pos[i]=[myPresentX,myPresentY]
         pygame.display.update()
-
+    
+    completedThreadCount=0
+    for thread1 in ClientThreads:
+        if not thread1.is_alive():
+            completedThreadCount+=1
+    
+    if completedThreadCount==len(ClientThreads):
+        if writePosToFile and file!=None:
+            for thread1 in ClientThreads:
+                for pos in thread1.node.positions:
+                    file.write(str(pos[0])+" "+str(pos[1])+" ")
+            file.close()
+        pygame.quit()
+        runThreads=False
+        continue
+                
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             pygame.quit()
-            
+            runThreads=False

@@ -2,12 +2,12 @@ import random
 from math import floor 
 from time import sleep
 
-maxspeed=50
-minspeed=25
+maxspeed=10
+minspeed=7
 minInAttractor=1
 maxInAttractor=1
 Logincost=8.5
-def main(ROWS,COLUMNS,node,turnoff,attractor=None):
+def main(ROWS,COLUMNS,node,turnoff,writePosToFile,attractor=None):
     cost=0
     boxsize=node.boxsize
     mins=minspeed
@@ -27,35 +27,27 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
     myPresentX=node.x
     myPresentY=node.y
     
-    myPresentX+=2
-    myPresentY+=2
-    
-    node.x=myPresentX
-    node.y=myPresentY
     node.Vx=Vx
     node.Vy=Vy
-    
+    count=0
     boolY=(myPresentY>=0 and myPresentY<=ROWS)
     boolX=(myPresentX>=0 and myPresentX<=COLUMNS)
     isInAttractor=False
-    while not turnoff:
-        p=[floor(node.x/boxsize),floor(node.y/boxsize)]
-       
+    while node.iterations>count and not turnoff:
+        p=[floor(node.x//boxsize),floor(node.y//boxsize)]
         if p in attractor:
-            # print(p)
-            
+            # print("hello")
+            # print(p)  
             mins=minInAttractor
             maxs=maxInAttractor
             Vx=(Vx//abs(Vx))*random.randint(mins,maxs)
             Vy=((Vy//abs(Vy)))*random.randint(mins,maxs)
             # print(Vx,Vy)
-        else:
+        elif mins!=minspeed:
             mins=minspeed
             maxs=maxspeed
             Vx=(Vx//abs(Vx))*random.randint(mins,maxs)
             Vy=(Vy//abs(Vy))*random.randint(mins,maxs)
-
-
         
         myTempX=myPresentX+Vx
         myTempY=myPresentY+Vy
@@ -68,19 +60,19 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
         bTempY= (myTempY>=0 and myTempY<=ROWS)
       
         if not bTempX:
-            if myTempX<=0:
-                myTempX=2
+            if myTempX<0:
+                myTempX=0
             else:
-                myTempX=COLUMNS+2-boxsize
+                myTempX=COLUMNS-boxsize
             Vx=-(Vx//abs(Vx))*random.randint(mins,maxs)
             Vy=((Vy//abs(Vy)))*random.randint(mins,maxs)
             
             
         if not bTempY:
-            if myTempY<=0:
-                myTempY=2
+            if myTempY<0:
+                myTempY=0
             else:
-                myTempY=ROWS+2-boxsize
+                myTempY=ROWS-boxsize
             Vx=(Vx//abs(Vx))*random.randint(mins,maxs)
             Vy=-((Vy//abs(Vy)))*random.randint(mins,maxs)
         
@@ -105,11 +97,15 @@ def main(ROWS,COLUMNS,node,turnoff,attractor=None):
         
         myPresentX=myTempX
         myPresentY=myTempY
+        
         node.x=myPresentX
         node.y=myPresentY
-        # print(node.x,node.y)
+        if writePosToFile:
+            node.positions.append([node.x,node.y])
+
         node.Vx=Vx
         node.Vy=Vy
+        count+=1
         sleep(0.3)
         
 if __name__=="__main__":
