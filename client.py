@@ -101,8 +101,7 @@ def main(ROWS,COLUMNS,node,turnoff,writePosToFile,attractor=None):
         node.x=myPresentX
         node.y=myPresentY
         if writePosToFile:
-            node.positions.append([node.x,node.y])
-
+            node.positions.append([node.x,node.y,node.edgeThread.threadID])
         node.Vx=Vx
         node.Vy=Vy
         count+=1

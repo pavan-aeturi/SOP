@@ -1,11 +1,8 @@
 import pygame
-from client import main as clientMain
 import threading
-import random
 from math import ceil
 from colors import colors as C
-from  time import sleep
-from edge import myClientThread,node
+from edge import myClientThread
 from attractor import getAttractorArea,getOnlyAttractor
 
 WHITE  =[255,255,255]
@@ -16,19 +13,21 @@ NODE   =[250,120,120]
 ATTRACT=[100,50,100]
 ROWS   =500
 COLUMNS=500
+REPEL=[255,255,191]
 loadBalancing=False
 gridsize=25
 useColors=True
 targetEdge=5
 iterations=10
 boxSize=gridsize-2
-numberOfParticals=100
+numberOfParticals=1
 edgesAlongRow=4
+threshold=1.5
 attractorSize=20
 ClientThreads=[]
 edgeThreads=[]
 edgeBoundariesVisible=True
-writePosToFile=False
+writePosToFile=True
 FILE_NAME="positions.txt"
 file = None
 
@@ -52,6 +51,7 @@ def returnCloser(edges,boundary):
                 e=ed
                 closest=val
     return e
+
 class edgeClients(threading.Thread):
     def __init__(self, threadID,firstX,lastX,firstY,lastY,clientThreads=[]):
         threading.Thread.__init__(self)
@@ -97,7 +97,7 @@ class edgeClients(threading.Thread):
                    e=ed
                    myReale=e
                    break
-        if loadBalancing and len(e.clientThreads)>=ceil(1.5*numberOfParticals/(edgesAlongRow*edgesAlongRow)):
+        if loadBalancing and len(e.clientThreads)>=ceil(threshold*numberOfParticals/(edgesAlongRow*edgesAlongRow)):
             e=returnCloser(myReale.faceNeighbours,boundary) or myReale
             if e is myReale:
                 e = returnCloser(myReale.cornerNeighbours,boundary) or myReale
@@ -161,7 +161,7 @@ for i in range(targetEdge,targetEdge+1):
 attractor=getOnlyAttractor(ROWS//gridsize,isAttractor)
 
 for i in range(numberOfParticals):
-    thread1 = myClientThread(i,writePosToFile,attractor,iterations,gridsize)
+    thread1 = myClientThread(writePosToFile,i,attractor,iterations,gridsize)
     myPresentX,myPresentY,colors=thread1.getCoorColors()
     x=myPresentX//(edgeGridSize)
     y=myPresentY//(edgeGridSize)
@@ -178,11 +178,11 @@ for i in range(ROWS//gridsize):
         
 if writePosToFile:
     file = open(FILE_NAME, "w")
-    file.write(str(gridsize)+" "+str(numberOfParticals)+" "+str(iterations))
-    file.write(str(edgesAlongRow)+" "+str(len(attractor))+" ")
+    file.write(str(gridsize)+" "+str(numberOfParticals)+" "+str(iterations)+" ")
+    file.write(str(edgesAlongRow)+" ")
     for i in range(ROWS//gridsize):
         for j in range(ROWS//gridsize):
-            file.write(isAttractor[i][j]*1+" ")
+            file.write(str(1 if isAttractor[i][j]==True else 0)+" ")
     
 for i in range(numberOfParticals):
     ClientThreads[i].start()
@@ -215,7 +215,7 @@ while runThreads:
         if writePosToFile and file!=None:
             for thread1 in ClientThreads:
                 for pos in thread1.node.positions:
-                    file.write(str(pos[0])+" "+str(pos[1])+" ")
+                    file.write(str(pos[0])+" "+str(pos[1])+" "+str(pos[2])+" ")
             file.close()
         pygame.quit()
         runThreads=False

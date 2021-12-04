@@ -5,11 +5,13 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": [],
+      "args": [
+        ""
+      ],
       "stopAtEntry": false,
-      "cwd": "/home/pavan/Desktop/6th Sem/SOP",
+      "cwd": "/home/pavan/Desktop/NEW ALL/6th Sem/SOP",
       "environment": [],
-      "program": "/home/pavan/Desktop/6th Sem/SOP/build/Debug/outDebug",
+      "program": "/home/pavan/Desktop/NEW ALL/6th Sem/SOP/build/Debug/outDebug",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "/usr/bin/gdb",

@@ -20,7 +20,6 @@ class myClientThread (threading.Thread):
       
     def run(self):
        clientMain(ROWS,COLUMNS,self.node,self.turnoff,self.writePosToFile,self.attractor)
-    #    print("done")
     
     def syncNodeWithEdge(self,edgeThread,potentialThread):
         self.node.setEdge(edgeThread,potentialThread)
